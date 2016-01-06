@@ -43,8 +43,10 @@ function runModel(array, vacancies, grid_n)
     pausetime = .1;
     
     itr = 0;
-    while(itr < iterations)
-
+    changes = 1;
+    
+    while(itr <= iterations) && (changes ~= 0)
+        changes = 0;
         title(sprintf('N=%d, Iteration=%d',grid_n,itr));
 
         %draw current grid
@@ -54,7 +56,7 @@ function runModel(array, vacancies, grid_n)
         %move squares if they need to relocate.
         for r=1:grid_n
             for c=1:grid_n
-                if willMove(array, r, c)
+                if wantsToMove(array, r, c)
                     %find empty spot to move to
                     ind = findVacancy(vacancies);
                     newr = vacancies(ind).r;
@@ -64,6 +66,8 @@ function runModel(array, vacancies, grid_n)
                     %update the vacancy to spot previously occupied
                     vacancies(ind).r = r;
                     vacancies(ind).c = c;
+                    
+                    changes = 1;
                 end
             end
         end
@@ -96,16 +100,14 @@ function drawGrid(array)
     shg
 end
 
-function yn = willMove(array, curr, curc)
+function yn = wantsToMove(array, curr, curc)
     n = size(array,1);
     
     same_count = -1; %offset for counting yourself
-    square_count = -1; %same as above
     for r = curr-1:curr+1
         for c = curc-1:curc+1
             %check for valid square:
             if r > 0 && c > 0 && r <= n && c <= n
-                square_count = square_count+1;
                 if array(r,c) == array(curr,curc)
                     same_count = same_count+1;
                 end
@@ -113,7 +115,7 @@ function yn = willMove(array, curr, curc)
         end
     end
     
-    yn = same_count/square_count < 1/2;
+    yn = same_count < 3;
 end
 
 function ind = findVacancy(vacancies)
